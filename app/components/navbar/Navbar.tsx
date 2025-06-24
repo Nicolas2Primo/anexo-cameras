@@ -1,8 +1,9 @@
 import { NavLink } from "react-router";
 import clsx from "clsx";
 
-const navLinks = ["Cameras", "Dashboard", "Settings"];
+const baseNavLinks = ["Cameras", "Dashboard", "Settings"];
 
+// Definimos as propriedades que o nosso componente pode receber
 interface NavbarProps {
   variant: "animated" | "static";
   // A visibilidade só é necessária para a variante animada
@@ -11,6 +12,17 @@ interface NavbarProps {
 
 export default function Navbar({ variant, isVisible }: NavbarProps) {
   const isAnimated = variant === "animated";
+
+  // A lista de links a ser renderizada muda com base na variante
+  const linksToRender = isAnimated ? baseNavLinks : ["Home", ...baseNavLinks];
+
+  // Função para obter o caminho correto para cada link
+  const getPathForLink = (link: string) => {
+    if (link.toLowerCase() === "home") {
+      return "/";
+    }
+    return `/${link.toLowerCase()}`;
+  };
 
   const navClasses = clsx(
     "flex gap-8 px-6 py-3 backdrop-blur-xl bg-black/30 rounded-2xl z-50", // Classes base
@@ -26,8 +38,13 @@ export default function Navbar({ variant, isVisible }: NavbarProps) {
 
   return (
     <div className={navClasses}>
-      {navLinks.map((link) => (
-        <NavLink key={link} to={`/${link.toLowerCase()}`}>
+      {linksToRender.map((link) => (
+        <NavLink
+          key={link}
+          to={getPathForLink(link)}
+          // Adiciona a propriedade `end` para o link da Home para garantir que ele só fique ativo na rota exata "/"
+          end={link.toLowerCase() === "home"}
+        >
           {({ isActive }) => (
             <button
               className={clsx(
