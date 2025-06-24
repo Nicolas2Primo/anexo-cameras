@@ -70,14 +70,14 @@ export default function Home() {
       <video
         ref={videoRef}
         className="w-full h-full object-cover absolute"
-        src="/Vídeo_Pronto_NexusLab.mp4"
+        src="/Vídeo_Pronto_NexusLab2.mp4"
         autoPlay
         muted
         playsInline
         onError={(e) => console.error("ERRO AO CARREGAR O VÍDEO!", e)}
       ></video>
 
-      <Navbar variant="animated" isVisible={isNavVisible} />
+      <Navbar variant="animated" isHomeAnimationVisible={isNavVisible} />
     </div>
   );
 }

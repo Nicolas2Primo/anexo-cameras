@@ -1,38 +1,53 @@
 import { NavLink } from "react-router";
 import clsx from "clsx";
+import { useState, useEffect } from "react";
 
 const baseNavLinks = ["Cameras", "Dashboard", "Settings"];
 
-// Definimos as propriedades que o nosso componente pode receber
 interface NavbarProps {
   variant: "animated" | "static";
-  // A visibilidade só é necessária para a variante animada
-  isVisible?: boolean;
+  isHomeAnimationVisible?: boolean;
 }
 
-export default function Navbar({ variant, isVisible }: NavbarProps) {
-  const isAnimated = variant === "animated";
+export default function Navbar({
+  variant,
+  isHomeAnimationVisible,
+}: NavbarProps) {
+  const [isStaticNavVisible, setIsStaticNavVisible] = useState(false);
 
-  // A lista de links a ser renderizada muda com base na variante
-  const linksToRender = isAnimated ? baseNavLinks : ["Home", ...baseNavLinks];
+  const isAnimatedVariant = variant === "animated";
+  const linksToRender = isAnimatedVariant
+    ? baseNavLinks
+    : ["Home", ...baseNavLinks];
 
-  // Função para obter o caminho correto para cada link
-  const getPathForLink = (link: string) => {
-    if (link.toLowerCase() === "home") {
-      return "/";
+  useEffect(() => {
+    if (!isAnimatedVariant) {
+      const timer = setTimeout(() => {
+        setIsStaticNavVisible(true);
+      }, 100); // 100ms de delay
+
+      return () => clearTimeout(timer); // Limpeza do timer
     }
+  }, [isAnimatedVariant]); // O efeito depende da variante da navbar
+
+  const getPathForLink = (link: string) => {
+    if (link.toLowerCase() === "home") return "/";
     return `/${link.toLowerCase()}`;
   };
 
+  // 4. Simplificar a lógica de visibilidade
+  const shouldBeVisible = isAnimatedVariant
+    ? isHomeAnimationVisible
+    : isStaticNavVisible;
+
   const navClasses = clsx(
-    "flex gap-8 px-6 py-3 backdrop-blur-xl bg-black/30 rounded-2xl z-50", // Classes base
+    "flex gap-8 px-6 py-3 backdrop-blur-xl bg-black/30 rounded-2xl z-50",
+    "transition-all duration-700 ease-in-out", // Aplicar a transição em AMBAS as variantes
     {
-      // Classes para a variante ANIMADA (Home)
-      "absolute bottom-60 transition-all duration-700 ease-in-out": isAnimated,
-      "opacity-100 translate-y-0": isAnimated && isVisible,
-      "opacity-0 translate-y-8": isAnimated && !isVisible,
-      // Classes para a variante ESTÁTICA (Outras páginas)
-      "absolute bottom-10": !isAnimated,
+      "absolute bottom-60": isAnimatedVariant, // Posição na Home
+      "absolute bottom-16": !isAnimatedVariant, // Posição nas outras páginas
+      "opacity-100 translate-y-0": shouldBeVisible, // Estado final visível
+      "opacity-0 translate-y-8": !shouldBeVisible, // Estado inicial invisível
     }
   );
 
@@ -42,7 +57,6 @@ export default function Navbar({ variant, isVisible }: NavbarProps) {
         <NavLink
           key={link}
           to={getPathForLink(link)}
-          // Adiciona a propriedade `end` para o link da Home para garantir que ele só fique ativo na rota exata "/"
           end={link.toLowerCase() === "home"}
         >
           {({ isActive }) => (
@@ -50,8 +64,8 @@ export default function Navbar({ variant, isVisible }: NavbarProps) {
               className={clsx(
                 "px-4 py-2 text-lg font-light tracking-widest rounded-full cursor-pointer transition-all duration-300 ease-in-out",
                 {
-                  "bg-white/20 scale-110": isActive, // Estilo para o link ativo
-                  "hover:bg-white/10 hover:scale-110": !isActive, // Estilo para links inativos
+                  "bg-white/20 scale-110": isActive,
+                  "hover:bg-white/10 hover:scale-110": !isActive,
                 }
               )}
             >
